@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_highlight/flutter_highlight_background.dart';
 import 'package:highlight/highlight.dart' show highlight, Node;
 
@@ -152,8 +152,8 @@ class _HighlightViewState extends State<HighlightView> {
               return progressIndicator;
             }
           }
-          return RichText(
-            text: TextSpan(
+          return SelectableText.rich(
+            TextSpan(
               style: _textStyle,
               children: snapshot.requireData,
             ),
