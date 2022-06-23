@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/flutter_highlight_background.dart';
 import 'package:highlight/highlight.dart' show highlight, Node;
@@ -54,13 +56,13 @@ class HighlightView extends StatefulWidget {
 
   @override
   State<HighlightView> createState() => _HighlightViewState();
-}
 
-class _HighlightViewState extends State<HighlightView> {
-  late Future<List<Node>> _nodesFuture;
-  late Future<List<TextSpan>> _spansFuture;
-
-  List<TextSpan> _convert(List<Node> nodes) {
+  /// Renders a list of [nodes] into a list of [TextSpan]s using the given
+  /// [theme].
+  static List<TextSpan> render(
+    List<Node> nodes,
+    Map<String, TextStyle> theme,
+  ) {
     List<TextSpan> spans = [];
     var currentSpans = spans;
     List<List<TextSpan>> stack = [];
@@ -69,11 +71,11 @@ class _HighlightViewState extends State<HighlightView> {
       if (node.value != null) {
         currentSpans.add(node.className == null
             ? TextSpan(text: node.value)
-            : TextSpan(text: node.value, style: widget.theme[node.className!]));
+            : TextSpan(text: node.value, style: theme[node.className!]));
       } else if (node.children != null) {
         List<TextSpan> tmp = [];
         currentSpans
-            .add(TextSpan(children: tmp, style: widget.theme[node.className!]));
+            .add(TextSpan(children: tmp, style: theme[node.className!]));
         stack.add(currentSpans);
         currentSpans = tmp;
 
@@ -92,6 +94,11 @@ class _HighlightViewState extends State<HighlightView> {
 
     return spans;
   }
+}
+
+class _HighlightViewState extends State<HighlightView> {
+  late Future<List<Node>> _nodesFuture;
+  late Future<List<TextSpan>> _spansFuture;
 
   void _parse(HighlightBackgroundProvider? backgroundProvider) => _nodesFuture =
       backgroundProvider?.parse(widget.source, language: widget.language) ??
@@ -99,14 +106,18 @@ class _HighlightViewState extends State<HighlightView> {
             highlight.parse(widget.source, language: widget.language).nodes,
           );
 
-  void _generateSpans() => _spansFuture = _nodesFuture.then(_convert);
+  void _render(HighlightBackgroundProvider? backgroundProvider) =>
+      _spansFuture = _nodesFuture.then((nodes) =>
+          (backgroundProvider?.render(nodes, widget.theme) ??
+                  HighlightView.render(nodes, widget.theme))
+              as FutureOr<List<TextSpan>>);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final backgroundProvider = HighlightBackgroundProvider.maybeOf(context);
     _parse(backgroundProvider);
-    _generateSpans();
+    _render(backgroundProvider);
   }
 
   @override
@@ -116,9 +127,10 @@ class _HighlightViewState extends State<HighlightView> {
         widget.language != oldWidget.language) {
       final backgroundProvider = HighlightBackgroundProvider.maybeOf(context);
       _parse(backgroundProvider);
-      _generateSpans();
+      _render(backgroundProvider);
     } else if (widget.theme != oldWidget.theme) {
-      _generateSpans();
+      final backgroundProvider = HighlightBackgroundProvider.maybeOf(context);
+      _render(backgroundProvider);
     }
   }
 
