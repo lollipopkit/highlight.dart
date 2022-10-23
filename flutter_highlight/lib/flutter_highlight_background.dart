@@ -152,8 +152,13 @@ void _isolateEntrypoint(SendPort sendPort) {
     if (request is _ParsingRequest || request is _RenderingRequest) {
       late final List<Node> nodes;
       if (request is _ParsingRequest) {
-        nodes =
-            highlight.parse(request.source, language: request.language).nodes!;
+        nodes = highlight
+            .parse(
+              request.source,
+              language: request.language,
+              autoDetection: true,
+            )
+            .nodes!;
       } else if (request is _RenderRequest) {
         nodes = request.nodes;
       }

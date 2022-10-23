@@ -103,7 +103,13 @@ class _HighlightViewState extends State<HighlightView> {
   void _parse(HighlightBackgroundProvider? backgroundProvider) => _nodesFuture =
       backgroundProvider?.parse(widget.source, language: widget.language) ??
           Future.value(
-            highlight.parse(widget.source, language: widget.language).nodes,
+            highlight
+                .parse(
+                  widget.source,
+                  language: widget.language,
+                  autoDetection: true,
+                )
+                .nodes,
           );
 
   void _render(HighlightBackgroundProvider? backgroundProvider) =>
