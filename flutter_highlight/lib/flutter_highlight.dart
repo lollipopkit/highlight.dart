@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_highlight/flutter_highlight_background.dart';
 import 'package:highlight/highlight.dart' show highlight, Node;
 
@@ -29,6 +30,8 @@ class HighlightViewSync extends StatelessWidget {
   /// Specify text styles such as font family and font size
   final TextStyle? textStyle;
 
+  final bool softWrap;
+
   HighlightViewSync(
     String input, {
     this.language,
@@ -36,6 +39,7 @@ class HighlightViewSync extends StatelessWidget {
     this.padding,
     this.textStyle,
     int tabSize = 8, // TODO: https://github.com/flutter/flutter/issues/50087
+    this.softWrap = false,
   }) : source = input.replaceAll('\t', ' ' * tabSize);
 
   List<TextSpan> _convert(List<Node> nodes) {
@@ -50,7 +54,8 @@ class HighlightViewSync extends StatelessWidget {
             : TextSpan(text: node.value, style: theme[node.className!]));
       } else if (node.children != null) {
         List<TextSpan> tmp = [];
-        currentSpans.add(TextSpan(children: tmp, style: theme[node.className!]));
+        currentSpans
+            .add(TextSpan(children: tmp, style: theme[node.className!]));
         stack.add(currentSpans);
         currentSpans = tmp;
 
@@ -89,19 +94,21 @@ class HighlightViewSync extends StatelessWidget {
       _textStyle = _textStyle.merge(textStyle);
     }
 
+    final textSpan = TextSpan(
+      style: _textStyle,
+      children: _convert(highlight.parse(source, language: language).nodes!),
+    );
+
     return Container(
       color: theme[_rootKey]?.backgroundColor ?? _defaultBackgroundColor,
       padding: padding,
-      child: SelectableText.rich(
-        TextSpan(
-          style: _textStyle,
-          children: _convert(highlight.parse(source, language: language).nodes!),
-        ),
+      child: RichText(
+        text: textSpan,
+        softWrap: softWrap,
       ),
     );
   }
 }
-
 
 /// Highlight Flutter Widget
 class HighlightView extends StatefulWidget {
@@ -282,8 +289,8 @@ class _HighlightViewState extends State<HighlightView> {
               return progressIndicator;
             }
           }
-          return SelectableText.rich(
-            TextSpan(
+          return RichText(
+            text: TextSpan(
               style: _textStyle,
               children: snapshot.requireData,
             ),
