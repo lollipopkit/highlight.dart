@@ -32,6 +32,8 @@ class HighlightViewSync extends StatelessWidget {
 
   final bool softWrap;
 
+  final Key? key;
+
   HighlightViewSync(
     String input, {
     this.language,
@@ -40,6 +42,7 @@ class HighlightViewSync extends StatelessWidget {
     this.textStyle,
     int tabSize = 8, // TODO: https://github.com/flutter/flutter/issues/50087
     this.softWrap = false,
+    this.key,
   }) : source = input.replaceAll('\t', ' ' * tabSize);
 
   List<TextSpan> _convert(List<Node> nodes) {
@@ -100,6 +103,7 @@ class HighlightViewSync extends StatelessWidget {
     );
 
     return Container(
+      key: key,
       color: theme[_rootKey]?.backgroundColor ?? _defaultBackgroundColor,
       padding: padding,
       child: RichText(
@@ -141,6 +145,8 @@ class HighlightView extends StatefulWidget {
   /// This may only be used if a [HighlightBackgroundEnvironment] is available.
   final Widget? progressIndicator;
 
+  final Key? key;
+
   HighlightView(
     String input, {
     this.language,
@@ -149,6 +155,7 @@ class HighlightView extends StatefulWidget {
     this.textStyle,
     int tabSize = 8, // TODO: https://github.com/flutter/flutter/issues/50087
     this.progressIndicator,
+    this.key,
   }) : source = input.replaceAll('\t', ' ' * tabSize);
 
   static const _rootKey = 'root';
@@ -271,6 +278,7 @@ class _HighlightViewState extends State<HighlightView> {
     }
 
     return Container(
+      key: widget.key,
       color: widget.theme[HighlightView._rootKey]?.backgroundColor ??
           HighlightView._defaultBackgroundColor,
       padding: widget.padding,
