@@ -30,7 +30,7 @@ class HighlightViewSync extends StatelessWidget {
   /// Specify text styles such as font family and font size
   final TextStyle? textStyle;
 
-  final bool softWrap;
+  final bool selectable;
 
   final Key? key;
 
@@ -41,7 +41,7 @@ class HighlightViewSync extends StatelessWidget {
     this.padding,
     this.textStyle,
     int tabSize = 8, // TODO: https://github.com/flutter/flutter/issues/50087
-    this.softWrap = false,
+    this.selectable = false,
     this.key,
   }) : source = input.replaceAll('\t', ' ' * tabSize);
 
@@ -106,10 +106,8 @@ class HighlightViewSync extends StatelessWidget {
       key: key,
       color: theme[_rootKey]?.backgroundColor ?? _defaultBackgroundColor,
       padding: padding,
-      child: RichText(
-        text: textSpan,
-        softWrap: softWrap,
-      ),
+      child:
+          selectable ? SelectableText.rich(textSpan) : RichText(text: textSpan),
     );
   }
 }
